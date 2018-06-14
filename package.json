@@ -1,0 +1,33 @@
+{
+  "name": "orologio",
+  "version": "1.0.0",
+  "description": "orologio",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rimraf dist",
+    "start": "nodemon server/server.js --ignore src/",
+    "compile": "npm run clean && mkdirp ./dist && webpack --config prod-webpack.config.js"
+  },
+  "author": "stefano bovio",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "6.24.1",
+    "babel-core": "6.22.1",
+    "babel-eslint": "7.1.1",
+    "babel-loader": "6.2.10",
+    "babel-preset-es2015": "6.22.0",
+    "babel-preset-stage-0": "6.5.0",
+    "eslint": "3.19.0",
+    "express": "4.14.1",
+    "nodemon": "1.11.0",
+    "raw-loader": "0.5.1",
+    "webpack": "2.2.1",
+    "webpack-dev-middleware": "1.10.0",
+    "webpack-hot-middleware": "2.16.1",
+    "webpack-parallel-uglify-plugin": "1.0.2"
+  },
+  "dependencies": {
+    "css-loader": "0.28.9",
+    "lodash": "4.17.4"
+  }
+}
