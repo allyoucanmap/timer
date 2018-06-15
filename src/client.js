@@ -3,16 +3,51 @@
 import {createElement, updateElement} from './utils/DOMUtils';
 
 const dates = [
+    'Aug 3',
     'Aug 15',
     'Nov 1',
     'Dec 25'
 ];
 
-const name = window.location.search && decodeURI(window.location.search.substring(1, window.location.search.length)) || Math.round(Math.random()) === 1 && 7 || 'verde';
+const query = window.location.search && decodeURI(window.location.search.substring(1, window.location.search.length));
+let array = ['verde', 7, query];
+
+try {
+    const store = JSON.parse(localStorage.getItem('__orologio~values__'));
+    array = [...array, ...store.array]
+} catch(e) {
+    //
+}
+
+if (query) {
+    localStorage.setItem('__orologio~values__', JSON.stringify({array}));
+}
+
+const name = query || array[Math.floor(Math.random() * array.length)] || '7';
 
 const style = createElement('style');
 style.innerHTML = require('./css/style.css').toString();
 document.head.appendChild(style);
+
+const videos = [
+    'bAojxWZRVKk',
+    '3eevUjhIlfM',
+    'wTAKjBONjJ0'
+];
+
+const video = videos[Math.floor(Math.random() * videos.length)];
+
+const iframe = createElement('iframe', {
+    src: `https://www.youtube.com/embed/${video}?autoplay=1&loop=1&playlist=${video}`,
+    frameborder: 0,
+    allow: 'autoplay'
+}, {
+    position: 'absolute',
+    width: '100%',
+    height: '100%'
+});
+
+document.body.appendChild(iframe);
 
 const canvas = createElement('canvas',
 {class: 'canvas', width: window.innerWidth, height: window.innerHeight},
@@ -58,6 +93,7 @@ const date = dates.map(d => ({date: new Date(`${d}, ${year} 18:30:00`), value: d
     .reduce((previous, current) => current.date.getTime() - tday < previous.date.getTime() - tday ? current : previous);
 
 const end = date.date.getTime();
+today.setHours(18, 30);
 const friday = today.setDate(today.getDate() + (5 + 7 - today.getDay()) % 7);
 
 const getCount = target => {
@@ -65,10 +101,10 @@ const getCount = target => {
     const distance = target - now;
     const day = Math.floor(distance / (1000 * 60 * 60 * 24));
     const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60 * 60 * 24)) / 1000);
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
     const mseconds = distance;
-    return `${day ? day + ' d' : ''} ${hours ? hours + ' h' : ''} ${minutes ? minutes + ' m' : ''} ${seconds ? seconds + ' s' : ''} ${mseconds ? mseconds + ' ms' : ''}`;
+    return mseconds > 0 ? `${day ? day + 'd' : ''} ${hours ? hours + 'h' : ''} ${minutes ? minutes + 'm' : ''} ${seconds ? seconds + 's' : ''} ${mseconds ? mseconds + 'ms' : ''}` : '';
 };
 
 setInterval(() => {
