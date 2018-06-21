@@ -43,8 +43,10 @@ const iframe = createElement('iframe', {
     allow: 'autoplay'
 }, {
     position: 'absolute',
-    width: '100%',
-    height: '100%'
+    width: '50%',
+    height: '50%',
+    top: '25%',
+    left: '25%'
 });
 
 document.body.appendChild(iframe);
@@ -70,8 +72,8 @@ container.onmousemove = (event) => {
     ctx.fillText(name, event.clientX, event.clientY);
 
     ctx.font = '64px serif';
-    const color = Math.floor(30 + Math.abs(Math.sin(cnt)) * 75);
-    ctx.fillStyle = 'rgb(' + color + ', ' + color + ', ' + color + ')';
+    const color = Math.floor(Math.abs(Math.sin(cnt)) * 360);
+    ctx.fillStyle = 'hsl(' + color + ', 100%, 75%)';
     ctx.textAlign =  'center';
     ctx.fillText(name, event.clientX, event.clientY);
     cnt += 0.01;
