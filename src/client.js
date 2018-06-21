@@ -43,13 +43,15 @@ const iframe = createElement('iframe', {
     allow: 'autoplay'
 }, {
     position: 'absolute',
-    width: '50%',
-    height: '50%',
-    top: '25%',
-    left: '25%'
+    width: '100%',
+    height: '100%'
 });
 
 document.body.appendChild(iframe);
+
+document.body.onclick = () => {
+    iframe.src = `https://www.youtube.com/embed/${video}?autoplay=1&loop=1&playlist=${video}`;
+};
 
 const canvas = createElement('canvas',
 {class: 'canvas', width: window.innerWidth, height: window.innerHeight},
