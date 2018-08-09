@@ -4,7 +4,7 @@ import {createElement, updateElement} from './utils/DOMUtils';
 
 const dates = [
     'Aug 3',
-    'Aug 15',
+    'Aug 10',
     'Nov 1',
     'Dec 25'
 ];
@@ -47,7 +47,7 @@ const iframe = createElement('iframe', {
     height: '100%'
 });
 
-document.body.appendChild(iframe);
+// document.body.appendChild(iframe);
 
 document.body.onclick = () => {
     iframe.src = `https://www.youtube.com/embed/${video}?autoplay=1&loop=1&playlist=${video}`;
@@ -94,7 +94,7 @@ const today = new Date();
 const tday = today.getTime();
 const year = today.getFullYear();
 const date = dates.map(d => ({date: new Date(`${d}, ${year} 18:30:00`), value: d}))
-    .reduce((previous, current) => current.date.getTime() - tday < previous.date.getTime() - tday ? current : previous);
+    .reduce((previous, current) => Math.abs(current.date.getTime() - tday) < Math.abs(previous.date.getTime() - tday) ? current : previous);
 
 const end = date.date.getTime();
 today.setHours(18, 30);
