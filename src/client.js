@@ -5,6 +5,7 @@ import {createElement, updateElement} from './utils/DOMUtils';
 const dates = [
     'Aug 3',
     'Aug 10',
+    'Aug 19',
     'Nov 1',
     'Dec 25'
 ];
