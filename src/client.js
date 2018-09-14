@@ -47,7 +47,7 @@ const iframe = createElement('iframe', {
     height: '100%'
 });
 
-// document.body.appendChild(iframe);
+document.body.appendChild(iframe);
 
 document.body.onclick = () => {
     iframe.src = `https://www.youtube.com/embed/${video}?autoplay=1&loop=1&playlist=${video}`;
@@ -93,9 +93,12 @@ timer.appendChild(timerFriday);
 const today = new Date();
 const tday = today.getTime();
 const year = today.getFullYear();
-const date = dates.map(d => ({date: new Date(`${d}, ${year} 18:30:00`), value: d}))
-    .reduce((previous, current) => Math.abs(current.date.getTime() - tday) < Math.abs(previous.date.getTime() - tday) ? current : previous);
+const filteredDate = dates.map(d => ({date: new Date(`${d}, ${year} 18:30:00`), value: d}))
+    .filter(current => current.date.getTime() - tday > 0)
 
+const date = filteredDate.length === 0 && {date: new Date(`${dates[0]}, ${year} 18:30:00`), value: dates[0]}
+|| filteredDate.length === 1 && filteredDate[0]
+|| filteredDate.reduce((previous, current) => Math.abs(current.date.getTime() - tday) < Math.abs(previous.date.getTime() - tday) ? current : previous);
 const end = date.date.getTime();
 today.setHours(18, 30);
 const friday = today.setDate(today.getDate() + (5 + 7 - today.getDay()) % 7);
