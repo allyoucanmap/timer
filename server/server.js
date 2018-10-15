@@ -32,8 +32,10 @@ app.use('http://localhost:3000/', function(req, res) {
 });
 
 app.listen(port, function(error) {
-  if (error) throw error;
-  console.warn("Express server listening on port", port);
+  if (error) {
+    throw error;
+  }
+  console.warn("The times is running on port", port);
 });
 
 
