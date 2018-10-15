@@ -10,3 +10,5 @@ We welcome contributions in any form:
 * pull requests for bug fixes
 * pull requests for documentation
 * funding for any combination of the above
+
+Testing pull requests
