@@ -6,6 +6,7 @@ const dates = [
     'Aug 3',
     'Aug 10',
     'Nov 1',
+    'Dec 21',
     'Dec 25'
 ];
 
