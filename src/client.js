@@ -311,6 +311,7 @@ function  getHorses() {
     window.addEventListener('mousemove', onMouseMove, false);
     window.addEventListener('click', onClick, false);
     animate();
+    return canvas;
 }
 
 
@@ -323,7 +324,112 @@ const scavallamento = parseFloat(_day) > 3
 || parseFloat(_day) === 3 && parseFloat(_time) > 15;
 
 if (scavallamento) {
-    getHorses();
+    const canvas = getHorses();
+    const audioCtx = new AudioContext();
+    const createOscillator = () => {
+        let gain = audioCtx.createGain();
+        gain.gain.value = 0;
+        gain.connect(audioCtx.destination);
+        let oscillator = audioCtx.createOscillator();
+        oscillator.connect(gain);
+        oscillator.start(audioCtx.currentTime);
+        return {
+            gain,
+            oscillator
+        };
+    };
+    let currentNote = 0;
+    const notes = [
+        246.94,
+        246.94,
+        246.94,
+        
+        277.18,
+
+        293.66,
+        293.66,
+        293.66,
+
+        277.18
+    ];
+    const notesHigh = [
+        493.88,
+        493.88,
+        493.88,
+        
+        554.37,
+        587.33,
+        587.33,
+        587.33,
+
+        554.37
+    ];
+    const { gain, oscillator } = createOscillator();
+    const { gain: gainHigh, oscillator: oscillatorHight } = createOscillator();
+    let down = false;
+
+    const pePPe = function(text) {
+        let div = document.createElement('div');
+        div.style.position = 'absolute';
+        div.style.top = '16px';
+        div.style.fontSize = '64px';
+        div.style.right = 0;
+        div.innerHTML = text;
+        document.body.appendChild(div);
+
+        let eeee = [];
+
+        setTimeout(() => {
+            document.body.removeChild(div);
+            div = null;
+        }, 400);
+        let x = 0;
+        this.update = (disable) => {
+            eeee.forEach((ee) => {
+                ee.update(true);
+            });
+            if (div) {
+                x += 48;
+                div.style.right = `${x}px`;
+                if (!disable) {
+                    eeee.push(new pePPe('e'));
+                }
+            }
+            
+        };
+    }
+
+    let peeeee;
+
+    canvas.addEventListener('mousedown', function() {
+        gain.gain.value = 0.2;
+        oscillator.frequency.value = notes[currentNote];
+        oscillator.type = 'sawtooth';
+        gainHigh.gain.value = 0.2;
+        oscillatorHight.frequency.value = notesHigh[currentNote];
+        oscillatorHight.type = 'sawtooth';
+        if (!down) {
+            peeeee = new pePPe('P');
+            currentNote++;
+            if (currentNote === notes.length) {
+                currentNote = 0;
+            }
+            down = true;
+        }
+    });
+    canvas.addEventListener('mouseup', function() {
+        gain.gain.value = 0.0;
+        gainHigh.gain.value = 0.0;
+        down = false;
+        peeeee = undefined;
+    });
+
+    const animate = function() {
+        requestAnimationFrame(animate);
+        if (peeeee) peeeee.update();
+    }
+    animate();
+    
 } else {
     const videos = [
         'bAojxWZRVKk',
