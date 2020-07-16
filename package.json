@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "css-loader": "0.28.9",
-    "lodash": "4.17.15",
+    "lodash": "4.17.19",
     "oimo": "1.0.9",
     "three": "0.108.0",
     "tinycolor2": "1.4.1"
