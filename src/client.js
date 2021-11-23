@@ -463,7 +463,7 @@ const dates = [
     'Aug 10',
     'Aug 19',
     'Nov 1',
-    'Dec 21',
+    'Dec 24',
     'Dec 25'
 ];
 
