@@ -1,436 +1,54 @@
 /* copyright 2018, stefano bovio @allyoucanmap. */
 
-import {createElement, updateElement} from './utils/DOMUtils';
-import * as THREE from 'three';
-import { LegacyJSONLoader } from 'three/examples/jsm/loaders/deprecated/LegacyJSONLoader';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-
-import tinycolor from 'tinycolor2';
-import * as OIMO from 'oimo';
-
-function  getHorses() {
-    let width = window.innerWidth;
-    let height = window.innerHeight;
-
-    let canvas = document.createElement('canvas');
-
-    canvas.setAttribute('width', width);
-    canvas.setAttribute('width', height);
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    canvas.style.position = 'fixed';
-    canvas.style.fontSize = 0;
-
-    document.body.style.margin = 0;
-
-    document.body.appendChild(canvas);
-
-    let material = new THREE.MeshPhongMaterial({ color: '#ff0000' });
-    let boxGeometry = new THREE.BoxBufferGeometry(1, 1, 1);
-    let mouse = new THREE.Vector2();
-    let loader = new LegacyJSONLoader();
-
-    /*function getBox(scene, size, position) {
-        let mat = material.clone();
-        mat.wireframe = true;
-        mat.color = new THREE.Color('#000');
-        let pole = new THREE.Mesh(boxGeometry, mat);
-        pole.scale.x = size[0];
-        pole.scale.y = size[1];
-        pole.scale.z = size[2];
-        pole.position.x = position[0];
-        pole.position.y = position[1];
-        pole.position.z = position[2];
-        scene.add(pole);
-        return pole;
-    }*/
-
-    function getTerrain(scene) {
-        let geometry = new THREE.PlaneGeometry(25, 25, 16, 16);
-        geometry.vertices.forEach((vertex) => {
-            vertex.z = Math.random() * 1;
-        });
-        geometry.verticesNeedUpdate = true;
-        geometry.computeFaceNormals();
-        geometry.computeFlatVertexNormals();
-        geometry.elementsNeedUpdate = true;
-        let mat = material.clone();
-        mat.flatShading = true;
-        mat.color = new THREE.Color('#aaffaa');
-        let terrain = new THREE.Mesh(geometry, mat);
-        scene.add(terrain);
-        terrain.rotateX(-Math.PI / 2);
-        terrain.scale.multiplyScalar(10);
-        return terrain;
-    }
-
-    function getPole(scene) {
-        let mat = material.clone();
-        mat.color = new THREE.Color('#000');
-        let pole = new THREE.Mesh(boxGeometry, mat);
-        pole.scale.x = 0.05;
-        pole.scale.z = 0.05;
-        pole.scale.multiplyScalar(10);
-        scene.add(pole);
-        return pole;
-    }
-
-    // let sphereGeometry = new THREE.SphereGeometry(0.5);
-
-    function onMouseMove(event) {
-        mouse.x = (event.clientX / width) * 2 - 1;
-        mouse.y = -(event.clientY / height) * 2 + 1;
-    }
-
-    const backgroundColor = '#f2f2f2';
-
-    let raycaster = new THREE.Raycaster();
-    let scene = new THREE.Scene();
-    let light = new THREE.HemisphereLight('#fff', 0.9);
-    light.position.copy(new THREE.Vector3(0, 150, 0.5));
-    light.lookAt(new THREE.Vector3(0, 0, 0));
-    scene.add(light);
-    scene.background = new THREE.Color(backgroundColor);
-    // scene.fog = new THREE.Fog(backgroundColor, 10, 750);
-    let camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 10000);
-    camera.position.x = 100;
-    camera.position.y = 150;
-    camera.position.z = 100;
-    let renderer = new THREE.WebGLRenderer({ 
-        canvas
-    });
-    renderer.setSize(width, height);
-
-    window.addEventListener('resize', function() {
-        width = window.innerWidth;
-        height = window.innerHeight;
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-    });
-
-    let controls = new OrbitControls(camera, canvas);
-    let clock = new THREE.Clock();
-
-    let terrain = getTerrain(scene);
-    let pole = getPole(scene);
-
-    let world = new OIMO.World({
-        info: true
-    });
-
-    world.add({ size: [250, 20, 250], pos: [0, 0, 0], world });
-    // getBox(scene, [250, 20, 250],  [0, 0, 0]);
-
-    world.add({ size: [250, 20, 250], pos: [0, 260, 0], world });
-    // getBox(scene, [250, 20, 250],  [0, 260, 0]);
-
-    world.add({ size: [20, 250, 250], pos: [135, 125, 0], world });
-    // getBox(scene, [20, 250, 250],  [135, 125, 0]);
-
-    world.add({ size: [20, 250, 250], pos: [-135, 125, 0], world });
-    // getBox(scene, [20, 250, 250],  [-135, 125, 0]);
-
-
-    world.add({ size: [250, 250, 20], pos: [0, 125, 135], world });
-    // getBox(scene, [250, 250, 20],  [0, 125, 135]);
-
-    world.add({ size: [180, 250, 20], pos: [-100, 125, -135], world });
-    // getBox(scene, [180, 250, 20],  [-100, 125, -135]);
-
-    world.add({ size: [180, 250, 20], pos: [100, 125, -135], world });
-    // getBox(scene, [180, 250, 20],  [100, 125, -135]);
-
-    world.add({ size: [100, 180, 20], pos: [0, 50, -135], world });
-    // getBox(scene, [100, 180, 20],  [0, 50, -135]);
-
-    world.add({ size: [100, 180, 20], pos: [0, 250, -135], world });
-    // getBox(scene, [100, 180, 20],  [0, 250, -135]);
-
-    let portaMat = material.clone();
-
-    function getPortal(pos, scale) {
-        let portalMesh = new THREE.Mesh(boxGeometry, portaMat);
-        portalMesh.position.copy(new THREE.Vector3(...pos));
-        portalMesh.scale.copy(new THREE.Vector3(...scale));
-        scene.add(portalMesh);
-    }
-
-    getPortal([-10, 150, -135], [5, 20, 5]);
-    getPortal([10, 150, -135], [5, 20, 5]);
-    getPortal([0, 140, -135], [25, 5, 5]);
-    getPortal([0, 160, -135], [25, 5, 5]);
-    getPortal([0, 70, -135], [5, 140, 5]);
-
-    let horses = [];
-    let buffGeom = null;
-    function Horse(scene, position) {
-
-
-        let mat = material.clone();
-        // mat.wireframe = true;
-        mat.color = new THREE.Color(tinycolor(`hsl(${Math.floor(Math.random() * 360 )}, 90%, 75%)`).toHexString());
-        let horse = new THREE.Mesh(buffGeom, mat);
-        horse.scale.multiplyScalar(0.1); // 25 sphere
-        horse.name = horses.length;
-
-
-        let body = world.add({
-            type: 'sphere',
-            size: [3],
-            pos: position || [0, 100, 0],
-            move: true,
-            world
-        });
-        scene.add(horse);
-        this.update = function() {
-            if (!body.sleeping) {
-                horse.position.copy(body.getPosition());
-                horse.quaternion.copy(body.getQuaternion());
-
-            }
-            if (horse.position.y < -500) {
-                body.resetPosition(0, 100, 0);
-            }
-        };
-
-        this.impulse = (pos) => {
-
-            body.applyImpulse(pos,
-                new THREE.Vector3()
-            .subVectors(camera.position, horse.position)
-            .normalize()
-            .multiplyScalar(Math.random() + 0.1)
-            .normalize()
-            .multiplyScalar(10000))
-        
-        };
-        this.select = function() {
-            this.impulse(horse.position)
-            const newHorse = new Horse(scene, [horse.position.x, horse.position.y, horse.position.z]);
-            newHorse.impulse(horse.position);
-            horses = [...horses, newHorse];
-        };
-        this.mesh = () => horse;
-    }
-    loader.load('data/horse.json', (geom) => {
-        buffGeom = new THREE.BufferGeometry().fromGeometry(geom);
-        horses = [new Horse(scene)];
-    })
-
-
-    const MAX_POINTS = 500;
-
-    let fenceGeometry = new THREE.BufferGeometry();
-    let positions =new Float32Array(MAX_POINTS * 3);
-    let fenceMateial = new THREE.LineBasicMaterial({ color: '#000', linewidth: 10 });
-    let fenceMesh = new THREE.Line(fenceGeometry, fenceMateial);
-    fenceGeometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-
-    scene.add(fenceMesh);
-
-    let fenceGeometryA = new THREE.BufferGeometry();
-    let positionsA =new Float32Array(MAX_POINTS * 3);
-    let fenceMateialA = new THREE.LineBasicMaterial({ color: '#000', linewidth: 10 });
-    let fenceMeshA = new THREE.Line(fenceGeometryA, fenceMateialA);
-    fenceGeometryA.addAttribute('position', new THREE.BufferAttribute(positionsA, 3));
-    scene.add(fenceMeshA);
-
-    let count = 0;
-    let countA = 0;
-
-    let posX = 0;
-    let posY = 0;
-    let posZ = 0;
-
-
-
-    function onClick() {
-        let x = posX;
-        let y = posY;
-        let z = posZ;
-        let fence = fenceMesh.geometry.attributes.position.array;
-        fence[count++] = x;
-        fence[count++] = y + 0.75 * 10;
-        fence[count++] = z;
-        fenceMesh.geometry.attributes.position.needsUpdate = true;
-
-        let fenceA = fenceMeshA.geometry.attributes.position.array;
-        fenceA[countA++] = x;
-        fenceA[countA++] = y + 0.25 * 10;
-        fenceA[countA++] = z;
-        fenceMeshA.geometry.attributes.position.needsUpdate = true;
-
-        if (count >= MAX_POINTS * 3) {
-            count = 0;
+(function() {
+    function pad(value, size) {
+        var zeros = '';
+        for (var i = 0; i < size - (value + '').length; i++) {
+            zeros += '0';
         }
-        if (countA >= MAX_POINTS * 3) {
-            countA = 0;
-        }
-        let pol = pole.clone();
-        pol.position.copy(new THREE.Vector3(x, y + 0.5 * 10, z));
-        scene.add(pol);
-
-        raycaster.setFromCamera(mouse, camera);
-        let intersects = raycaster.intersectObjects(horses.map(horse => horse.mesh()));
-        if (intersects.length > 0) {
-            intersects.forEach(({ object }) => {
-                const selected = horses.find((horse) => horse.mesh().name === object.name);
-                if (selected) selected.select();
-            });
-        }
+        return zeros + value;
     }
-
-
-
-    function animate() {
-        requestAnimationFrame(animate);
-        world.step();
-        horses.forEach((horse) => {
-            horse.update();
-        });
-
-        raycaster.setFromCamera(mouse, camera);
-
-        let intersects = raycaster.intersectObjects([ terrain ]);
-
-        if (intersects.length > 0) {
-            const { x, y, z } = intersects[0].point;
-            posX = x;
-            posY = y;
-            posZ = z;
-            pole.position.copy(
-                new THREE.Vector3(x, y + 0.5 * 10, z)
-            );
-        }
-
-        renderer.render( scene, camera );
-        controls.update(clock.getDelta());
-    }
-
-    window.addEventListener('mousemove', onMouseMove, false);
-    window.addEventListener('click', onClick, false);
-    animate();
-    return canvas;
-}
-
-
-const _date = new Date();
-const _day = _date.getDay();
-const _time = _date.getHours();
-const _minutes = _date.getMinutes();
-const scavallamento = parseFloat(_day) > 3
-|| parseFloat(_day) === 3 && parseFloat(_time) === 14 && parseFloat(_minutes) >= 30
-|| parseFloat(_day) === 3 && parseFloat(_time) > 15;
-
-if (scavallamento) {
-    const canvas = getHorses();
-    const audioCtx = new AudioContext();
-    const createOscillator = () => {
-        let gain = audioCtx.createGain();
-        gain.gain.value = 0;
-        gain.connect(audioCtx.destination);
-        let oscillator = audioCtx.createOscillator();
-        oscillator.connect(gain);
-        oscillator.start(audioCtx.currentTime);
-        return {
-            gain,
-            oscillator
-        };
-    };
-    let currentNote = 0;
-    const notes = [
-        246.94,
-        246.94,
-        246.94,
-        
-        277.18,
-
-        293.66,
-        293.66,
-        293.66,
-
-        277.18
-    ];
-    const notesHigh = [
-        493.88,
-        493.88,
-        493.88,
-        
-        554.37,
-        587.33,
-        587.33,
-        587.33,
-
-        554.37
-    ];
-    const { gain, oscillator } = createOscillator();
-    const { gain: gainHigh, oscillator: oscillatorHight } = createOscillator();
-    let down = false;
-
-    const pePPe = function(text) {
-        let div = document.createElement('div');
-        div.style.position = 'absolute';
-        div.style.top = '16px';
-        div.style.fontSize = '64px';
-        div.style.right = 0;
-        div.innerHTML = text;
-        document.body.appendChild(div);
-
-        let eeee = [];
-
-        setTimeout(() => {
-            document.body.removeChild(div);
-            div = null;
-        }, 400);
-        let x = 0;
-        this.update = (disable) => {
-            eeee.forEach((ee) => {
-                ee.update(true);
-            });
-            if (div) {
-                x += 48;
-                div.style.right = `${x}px`;
-                if (!disable) {
-                    eeee.push(new pePPe('e'));
-                }
-            }
-            
-        };
-    }
-
-    let peeeee;
-
-    canvas.addEventListener('mousedown', function() {
-        gain.gain.value = 0.2;
-        oscillator.frequency.value = notes[currentNote];
-        oscillator.type = 'sawtooth';
-        gainHigh.gain.value = 0.2;
-        oscillatorHight.frequency.value = notesHigh[currentNote];
-        oscillatorHight.type = 'sawtooth';
-        if (!down) {
-            peeeee = new pePPe('P');
-            currentNote++;
-            if (currentNote === notes.length) {
-                currentNote = 0;
-            }
-            down = true;
-        }
-    });
-    canvas.addEventListener('mouseup', function() {
-        gain.gain.value = 0.0;
-        gainHigh.gain.value = 0.0;
-        down = false;
-        peeeee = undefined;
-    });
-
-    const animate = function() {
-        requestAnimationFrame(animate);
-        if (peeeee) peeeee.update();
-    }
-    animate();
     
-} else {
+    function getDatePart(value, uom, size) {
+        return value !== undefined
+            ? pad(value, size) + uom
+            : '';
+    }
+    
+    function getCountdown(now, target, daySize) {
+        const distance = target - now;
+        const day = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        const mseconds = distance;
+        return mseconds > 0
+            ? getDatePart(day, 'd', daySize) + ' ' +
+            getDatePart(hours, 'h', 2) + ' ' +
+            getDatePart(minutes, '', 2) + '-' +
+            getDatePart(seconds, '', 2)
+            : '';
+    }
+
+    function getPathData(coordinates, close) {
+        var d = '';
+        for (var idx = 0; idx < coordinates.length; idx++) {
+            const coord = coordinates[idx];
+            d += (idx === 0 && 'M' + coord[0] + ' ' + coord[1]
+                || idx === coordinates.length - 1 && ' L' + coord[0] + ' ' + coord[1] + (close ? 'Z' : '')
+                || ' L' + coord[0] + ' ' + coord[1]);
+        }
+        return d;
+    }
+
+    function getTargetDate(date, year) {
+        const now = new Date().getTime();
+        const targetDate = new Date(date + ', ' + year + ' 18:30:00');
+        return now > targetDate.getTime()
+            ? new Date(date + ', ' + (year + 1) + ' 18:30:00')
+            : targetDate
+    }
+
     const videos = [
         'bAojxWZRVKk',
         '3eevUjhIlfM',
@@ -439,116 +57,158 @@ if (scavallamento) {
         'JJVwPM26n9s'
     ];
     
-    const video = videos[Math.floor(Math.random() * videos.length)];
+    var video = videos[Math.floor(Math.random() * videos.length)];
+    const iframe = document.createElement('iframe');
     
-    const iframe = createElement('iframe', {
-        src: `https://www.youtube.com/embed/${video}?autoplay=1&loop=1&playlist=${video}`,
-        frameborder: 0,
-        allow: 'autoplay'
-    }, {
-        position: 'absolute',
-        width: '100%',
-        height: '100%'
-    });
-    
+    iframe.setAttribute('frameborder', 0);
+    iframe.setAttribute('allow', 'autoplay');
+    iframe.style.position = 'absolute';
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+
     document.body.appendChild(iframe);
-    
-    document.body.onclick = () => {
-        iframe.src = `https://www.youtube.com/embed/${video}?autoplay=1&loop=1&playlist=${video}`;
+
+    const div = document.createElement('div');
+    div.style.position = 'absolute';
+    div.style.width = '100%';
+    div.style.height = '100%';
+    div.style.top = 0;
+    div.style.left = 0;
+    div.style.background = '#222222';
+
+    document.body.appendChild(div);
+
+    var toggle = false;
+
+    document.body.onclick = function() {
+        toggle = !toggle;
+        if (toggle) {
+            div.style.opacity = 0.9;
+            video = videos[Math.floor(Math.random() * videos.length)];
+            iframe.setAttribute('src', 'https://www.youtube.com/embed/' + video + '?autoplay=1&loop=1&playlist=' + video);
+        } else {
+            div.style.opacity = 1;
+            iframe.setAttribute('src', '');
+        }
     };
-}
 
-const dates = [
-    'Aug 3',
-    'Aug 10',
-    'Aug 19',
-    'Nov 1',
-    'Dec 24',
-    'Dec 25'
-];
+    const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+    
+    const query = window.location.search && decodeURI(window.location.search.substring(1, window.location.search.length));
+    const date = query || 'December 24';
+    const today = new Date();
+    const year = today.getFullYear();
+    const friday = new Date(today.setDate(today.getDate() + (5 + 7 - today.getDay()) % 7)).setHours(18, 30, 00);
+    const targetDate = getTargetDate(date, year);
+    const end = targetDate.getTime();
+    
+    const width = 1920;
+    const height = 1080;
+    const svg = document.createElementNS(SVG_NAMESPACE, 'svg');
+    document.body.appendChild(svg);
+    svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
 
-const query = window.location.search && decodeURI(window.location.search.substring(1, window.location.search.length));
-let array = ['verde', 7, query];
+    document.body.style.background = '#222222';
 
-try {
-    const store = JSON.parse(localStorage.getItem('__orologio~values__'));
-    array = [...array, ...store.array]
-} catch(e) {
-    //
-}
+    function CountdownChar(x, y, size) {
+        const g = document.createElementNS(SVG_NAMESPACE, 'g');
+        svg.appendChild(g);
+        g.setAttribute('transform', 'translate(' + x +', ' + y +')')
 
-if (query) {
-    localStorage.setItem('__orologio~values__', JSON.stringify({array}));
-}
+        const path = document.createElementNS(SVG_NAMESPACE, 'path');
+        g.appendChild(path);
+        const border = size / 7;
+        const top = getPathData([[border, border], [size - border, border], [size - border * 2, border * 2], [border * 2, border * 2]], true);
+        const leftTop = getPathData([[border, border], [border * 2, border * 2], [border * 2, size - border / 2], [border * 1.5, size], [border, size - border / 2] ], true);
+        const rightTop = getPathData([[size - border, border], [size - border * 2, border * 2], [size - border * 2, size - border / 2], [size - border * 1.5, size], [size - border, size - border / 2] ], true);
+        const center = getPathData([[border * 1.5, size], [border * 2, size - border / 2], [size - border * 2, size - border / 2], [size - border * 1.5, size], [size - border * 2, size + border / 2], [border * 2, size + border / 2]], true);
+        const bottom = getPathData([[border, size * 2 - border], [size - border, size * 2 - border], [size - border * 2, size * 2 - border * 2], [border * 2, size * 2 - border * 2]], true);
+        const leftBottom = getPathData([[border, size * 2 - border], [border * 2, size * 2 - border * 2], [border * 2, size + border / 2], [border * 1.5, size], [border, size + border / 2] ], true);
+        const rightBottom = getPathData([[size - border, size * 2 - border], [size - border * 2, size * 2 - border * 2], [size - border * 2, size + border / 2], [size - border * 1.5, size], [size - border, size + border / 2] ], true);
+        path.setAttribute('d', top + leftTop + rightTop + center + bottom + leftBottom + rightBottom)
+        path.setAttribute('fill', '#333333');
+        path.setAttribute('stroke', '#444444');
+        path.setAttribute('stroke-width', 2);
 
-const name = query || array[Math.floor(Math.random() * array.length)] || '7';
+        const chars = {
+            '0': top + rightTop + rightBottom + bottom + leftBottom + leftTop,
+            '1': rightTop + rightBottom,
+            '2': top + rightTop + center + leftBottom + bottom,
+            '3': top + rightTop + center + rightBottom + bottom,
+            '4': leftTop + rightTop + center + rightBottom,
+            '5': top + leftTop + center + rightBottom + bottom,
+            '6': top + leftTop + center + leftBottom + rightBottom + bottom,
+            '7': top + rightTop + rightBottom,
+            '8': top + rightTop + rightBottom + bottom + leftBottom + leftTop + center,
+            '9': top + rightTop + rightBottom + bottom + leftTop + center,
+            'd': rightTop + center + leftBottom + rightBottom + bottom,
+            'h': leftTop + center + leftBottom + rightBottom,
+            '-': center,
+            'f': top + leftTop + center + leftBottom,
+            'r': center + leftBottom,
+            'i': leftBottom,
+            'a': leftBottom + center + rightBottom + leftTop + rightTop + top,
+            'y': leftTop + rightTop + center + leftBottom
+        };
 
-const style = createElement('style');
-style.innerHTML = require('./css/style.css').toString();
-document.head.appendChild(style);
+        const text = document.createElementNS(SVG_NAMESPACE, 'path');
+        g.appendChild(text);
+        
+        text.setAttribute('fill', '#fcc64c');
+        text.setAttribute('stroke', '#a71423');
+        text.setAttribute('stroke-width', 2);
+        text.style.filter = 'url(#glow)';
 
-const canvas = createElement('canvas',
-{class: 'canvas', width: window.innerWidth, height: window.innerHeight},
-{width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
-window.onresize = () => {
-    updateElement(canvas, {width: window.innerWidth, height: window.innerHeight},
-    {width: window.innerWidth + 'px', height: window.innerHeight + 'px'});
-};
-document.body.appendChild(canvas);
+        this.update = function(value) {
+            text.setAttribute('d', chars[value] || '')
+        }
+    }
 
-const ctx = canvas.getContext('2d');
+    var now = new Date().getTime();
+    var countdownDate = getCountdown(now, end, 3);
+    var countdownFriday = getCountdown(now, friday, 2);
 
-const container = createElement('div', {class: 'container'});
-document.body.appendChild(container);
-let cnt = 0;
-container.onmousemove = (event) => {
-    ctx.font = '65px serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign =  'center';
-    ctx.fillText(name, event.clientX, event.clientY);
+    const size = width / (countdownDate.length + 2);
 
-    ctx.font = '64px serif';
-    const color = Math.floor(Math.abs(Math.sin(cnt)) * 360);
-    ctx.fillStyle = 'hsl(' + color + ', 100%, 75%)';
-    ctx.textAlign =  'center';
-    ctx.fillText(name, event.clientX, event.clientY);
-    cnt += 0.01;
-};
+    var countdownDateNumbers = [];
+    for (var i = 0; i < countdownDate.length; i++) {
+        countdownDateNumbers.push(new CountdownChar(size + i * size, size * 2, size));
+    }
 
-const timer = createElement('div', {class: 'timer'});
-container.appendChild(timer);
+    var dateText = targetDate.getDate() + '-' + (targetDate.getMonth() + 1) + '-' + targetDate.getFullYear();
 
-const timerDate = createElement('div', {class: 'timer-date'});
-timer.appendChild(timerDate);
+    for (var i = 0; i < dateText.length; i++) {
+        const currentCharText = dateText[i];
+        const countdownChar = new CountdownChar(size + i * size / 2, size, size / 2);
+        countdownChar.update(currentCharText);
+    }
 
-const timerFriday = createElement('div', {class: 'timer-friday'});
-timer.appendChild(timerFriday);
+    var countdownFridayNumbers = [];
+    for (var i = 0; i < countdownFriday.length; i++) {
+        countdownFridayNumbers.push(new CountdownChar(size * 2 + i * size, size * 6, size));
+    }
 
-const today = new Date();
-const tday = today.getTime();
-const year = today.getFullYear();
-const filteredDate = dates.map(d => ({date: new Date(`${d}, ${year} 18:30:00`), value: d}))
-    .filter(current => current.date.getTime() - tday > 0)
+    var fridayText = 'friday';
+    for (var i = 0; i < fridayText.length; i++) {
+        const currentCharText = fridayText[i];
+        const countdownChar = new CountdownChar(size * 2 + i * size / 2, size * 5, size / 2);
+        countdownChar.update(currentCharText);
+    }
 
-const date = filteredDate.length === 0 && {date: new Date(`${dates[0]}, ${year} 18:30:00`), value: dates[0]}
-|| filteredDate.length === 1 && filteredDate[0]
-|| filteredDate.reduce((previous, current) => Math.abs(current.date.getTime() - tday) < Math.abs(previous.date.getTime() - tday) ? current : previous);
-const end = date.date.getTime();
-today.setHours(18, 30);
-const friday = today.setDate(today.getDate() + (5 + 7 - today.getDay()) % 7);
 
-const getCount = target => {
-    const now =  new Date().getTime();
-    const distance = target - now;
-    const day = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    const mseconds = distance;
-    return mseconds > 0 ? `${day ? day + 'd' : ''} ${hours ? hours + 'h' : ''} ${minutes ? minutes + 'm' : ''} ${seconds ? seconds + 's' : ''} ${mseconds ? mseconds + 'ms' : ''}` : '';
-};
-
-setInterval(() => {
-    timerDate.innerHTML = '<b>' + date.value + '</b><br/>' + getCount(end);
-    timerFriday.innerHTML = 'Next Friday<br/>' + getCount(friday);
-});
+    function animate() {
+        setTimeout(function() {
+            requestAnimationFrame(animate);
+        }, 1000);
+        now = new Date().getTime();
+        countdownFriday = getCountdown(now, friday, 2);
+        countdownDate = getCountdown(now, end, 3);
+        for (var i = 0; i < countdownDate.length; i++) {
+            countdownDateNumbers[i].update(countdownDate[i]);
+        }
+        for (var i = 0; i < countdownFriday.length; i++) {
+            countdownFridayNumbers[i].update(countdownFriday[i]);
+        }
+    }
+    animate();
+})();

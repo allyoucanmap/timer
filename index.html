@@ -4,11 +4,37 @@
 <head>
     <title>orologio</title>
     <meta charset="UTF-8">
+    <style>
+        body,
+        svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
-    <div id="app"></div>
-    <script language="javascript" type="text/javascript" src="./dist/orologio.js"></script>
+    <svg>
+        <defs>
+            <!-- from https://codepen.io/OpherV/pen/dRoQdN -->
+            <filter id="glow">
+                <fegaussianblur class="blur" result="coloredBlur" stddeviation="4"></fegaussianblur>
+                <femerge>
+                    <femergenode in="coloredBlur"></femergenode>
+                    <femergenode in="coloredBlur"></femergenode>
+                    <femergenode in="coloredBlur"></femergenode>
+                    <femergenode in="SourceGraphic"></femergenode>
+                </femerge>
+            </filter>
+        </defs>
+    </svg>
+    <script language="javascript" type="text/javascript" src="./src/client.js"></script>
 </body>
 
 </html>
