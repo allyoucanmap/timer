@@ -25,7 +25,7 @@
         return mseconds > 0
             ? getDatePart(day, 'd', daySize) + ' ' +
             getDatePart(hours, 'h', 2) + ' ' +
-            getDatePart(minutes, '', 2) + '-' +
+            getDatePart(minutes, 'm', 2) + ' ' +
             getDatePart(seconds, '', 2)
             : '';
     }
@@ -117,15 +117,30 @@
 
         const path = document.createElementNS(SVG_NAMESPACE, 'path');
         g.appendChild(path);
-        const border = size / 7;
-        const top = getPathData([[border, border], [size - border, border], [size - border * 2, border * 2], [border * 2, border * 2]], true);
+        const border = size / 8;
+        const topL = getPathData([[border, border], [size/2, border], [size/2, border * 2], [border * 2, border * 2]], true);
+        const topR = getPathData([[size / 2, border], [size - border, border], [size - border * 2, border * 2], [size / 2, border * 2]], true);
+        const top = topL + topR;
         const leftTop = getPathData([[border, border], [border * 2, border * 2], [border * 2, size - border / 2], [border * 1.5, size], [border, size - border / 2] ], true);
         const rightTop = getPathData([[size - border, border], [size - border * 2, border * 2], [size - border * 2, size - border / 2], [size - border * 1.5, size], [size - border, size - border / 2] ], true);
-        const center = getPathData([[border * 1.5, size], [border * 2, size - border / 2], [size - border * 2, size - border / 2], [size - border * 1.5, size], [size - border * 2, size + border / 2], [border * 2, size + border / 2]], true);
-        const bottom = getPathData([[border, size * 2 - border], [size - border, size * 2 - border], [size - border * 2, size * 2 - border * 2], [border * 2, size * 2 - border * 2]], true);
+        const centerL = getPathData([[border * 1.5, size], [border * 2, size - border / 2], [size / 2, size - border / 2], [size / 2, size + border / 2], [border * 2, size + border / 2]], true);
+        const centerR = getPathData([[size / 2, size - border / 2], [size - border * 2, size - border / 2], [size - border * 1.5, size], [size - border * 2, size + border / 2], [size / 2, size + border / 2]], true);
+        const center = centerL + centerR;
+        const bottomL = getPathData([[border, size * 2 - border], [size/2, size * 2 - border], [size/2, size * 2 - border * 2], [border * 2, size * 2 - border * 2]], true);
+        const bottomR = getPathData([[size/2, size * 2 - border], [size - border, size * 2 - border], [size - border * 2, size * 2 - border * 2], [size/2, size * 2 - border * 2]], true);
+        const bottom = bottomL + bottomR;
         const leftBottom = getPathData([[border, size * 2 - border], [border * 2, size * 2 - border * 2], [border * 2, size + border / 2], [border * 1.5, size], [border, size + border / 2] ], true);
         const rightBottom = getPathData([[size - border, size * 2 - border], [size - border * 2, size * 2 - border * 2], [size - border * 2, size + border / 2], [size - border * 1.5, size], [size - border, size + border / 2] ], true);
-        path.setAttribute('d', top + leftTop + rightTop + center + bottom + leftBottom + rightBottom)
+        const middleTop = getPathData([[size / 2 - border / 2, border * 2], [size / 2 + border / 2, border * 2], [size / 2 + border / 2, size - border / 2], [size / 2 - border / 2, size - border / 2]], true);
+        const middleBottom = getPathData([[size / 2 - border / 2, size + border / 2], [size / 2 + border / 2, size + border / 2], [size / 2 + border / 2, size * 2 - border * 2], [size / 2 - border / 2, size * 2 - border * 2]], true);
+        const middle = middleTop + middleBottom;
+        const crossBorder = border / Math.sin(Math.PI / 6);
+        const crossTL = getPathData([[border * 2, border * 2], [border * 2, border * 2 + crossBorder], [size / 2 - border / 2, size - border / 2], [size / 2 - border / 2, size - border / 2 - crossBorder]], true);
+        const crossTR = getPathData([[size - border * 2, border * 2], [size - border * 2, border * 2 + crossBorder], [size / 2 + border / 2, size - border / 2], [size / 2 + border / 2, size - border / 2 - crossBorder]], true);
+        const crossBL = getPathData([[border * 2, size * 2 - border * 2], [border * 2, size * 2 - border * 2 - crossBorder], [size / 2 - border / 2, size + border / 2], [size / 2 - border / 2, size + border / 2 + crossBorder]], true);
+        const crossBR = getPathData([[size - border * 2, size * 2 - border * 2], [size - border * 2, size * 2 - border * 2 - crossBorder], [size / 2 + border / 2, size + border / 2], [size / 2 + border / 2, size + border / 2 + crossBorder]], true);
+        const cross = crossTL + crossTR + crossBL + crossBR;
+        path.setAttribute('d', top + leftTop + rightTop + center + bottom + leftBottom + rightBottom + middle + cross);
         path.setAttribute('fill', '#333333');
         path.setAttribute('stroke', '#444444');
         path.setAttribute('stroke-width', 2);
@@ -142,13 +157,15 @@
             '8': top + rightTop + rightBottom + bottom + leftBottom + leftTop + center,
             '9': top + rightTop + rightBottom + bottom + leftTop + center,
             'd': rightTop + center + leftBottom + rightBottom + bottom,
-            'h': leftTop + center + leftBottom + rightBottom,
+            'h': leftTop + center + leftBottom + rightBottom + rightTop,
             '-': center,
             'f': top + leftTop + center + leftBottom,
-            'r': center + leftBottom,
-            'i': leftBottom,
+            'r': center + top + leftTop + rightTop + leftBottom + crossBR,
+            'i': middle,
             'a': leftBottom + center + rightBottom + leftTop + rightTop + top,
-            'y': leftTop + rightTop + center + leftBottom
+            'y': crossTL + crossTR + middleBottom,
+            'm': leftTop + leftBottom + rightTop + rightBottom + crossTL + crossTR,
+            's': top + crossTL + crossBR + bottom
         };
 
         const text = document.createElementNS(SVG_NAMESPACE, 'path');
