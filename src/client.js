@@ -171,7 +171,7 @@
         const text = document.createElementNS(SVG_NAMESPACE, 'path');
         g.appendChild(text);
         
-        text.setAttribute('fill', '#fcc64c');
+        text.setAttribute('fill', '#ff5d5d');
         text.setAttribute('stroke', '#a71423');
         text.setAttribute('stroke-width', 2);
         text.style.filter = 'url(#glow)';
